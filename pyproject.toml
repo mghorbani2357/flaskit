@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flaskit"
-version = "0.1.0"
+version = "0.1.1"
 description = "CLI scaffolding tool for Flask-Smorest projects with modular resources and Swagger definitions"
 readme = "README.md"
 license = { text = "GPL-3.0-or-later" }
@@ -21,6 +21,8 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Software Development :: Code Generators",
 ]
 dependencies = [
@@ -37,6 +39,7 @@ docs = [
 ]
 test = [
     "pytest>=7.0",
+    "build>=1.0",
     "Flask>=3.0",
     "flask-smorest>=0.44",
     "marshmallow>=3.20",
@@ -48,7 +51,7 @@ test = [
 flaskit = "flaskit.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/flaskit/flaskit"
+Homepage = "https://github.com/mghorbani2357/flaskit"
 Documentation = "https://flaskit.readthedocs.io/"
 
 [tool.setuptools]
@@ -59,8 +62,13 @@ include = ["flaskit*"]
 
 [tool.setuptools.package-data]
 flaskit = [
-    "templates/**/*",
-    "templates/**/.*",
+    "templates/*.j2",
+    "templates/*/*.j2",
+    "templates/project/*",
+    "templates/project/assets/*",
+    "templates/project/assets/statics/*",
+    "templates/project/assets/swagger-ui/*",
+    "templates/module/*",
 ]
 
 [tool.pytest.ini_options]

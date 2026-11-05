@@ -2,20 +2,43 @@
 
 from __future__ import annotations
 
+import os
 import re
 import shutil
 from importlib import resources
 from pathlib import Path
 
 import click
-from jinja2 import Environment, PackageLoader, StrictUndefined, select_autoescape
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, TemplateNotFound
+from jinja2 import select_autoescape
 
 MODULE_NAME_RE = re.compile(r"^[a-z][a-z0-9_]*$")
+
+# Old packaged name (dotfile) was dropped by setuptools; keep alias for safety.
+TEMPLATE_ALIASES = {
+    "project/.env.example.j2": "project/env.example.j2",
+}
+
+
+def _templates_root() -> Path:
+    """Return filesystem path to packaged Jinja templates."""
+    traversable = resources.files("flaskit").joinpath("templates")
+    try:
+        path = Path(os.fspath(traversable))  # type: ignore[arg-type]
+    except TypeError:
+        # Namespace / zip fallback
+        path = Path(str(traversable))
+    if not path.is_dir():
+        raise click.ClickException(
+            "flaskit templates are missing from the installation. "
+            "Reinstall with: pip install -U git+https://github.com/mghorbani2357/flaskit.git"
+        )
+    return path
 
 
 def _env() -> Environment:
     return Environment(
-        loader=PackageLoader("flaskit", "templates"),
+        loader=FileSystemLoader(_templates_root()),
         undefined=StrictUndefined,
         autoescape=select_autoescape(enabled_extensions=()),
         keep_trailing_newline=True,
@@ -23,7 +46,17 @@ def _env() -> Environment:
 
 
 def _render(template_name: str, **context: object) -> str:
-    return _env().get_template(template_name).render(**context)
+    name = TEMPLATE_ALIASES.get(template_name, template_name)
+    env = _env()
+    try:
+        return env.get_template(name).render(**context)
+    except TemplateNotFound as exc:
+        available = sorted(env.list_templates(extensions=("j2",)))
+        raise click.ClickException(
+            f"Template not found: {template_name} (resolved: {name}). "
+            f"Available: {', '.join(available) or '(none)'}. "
+            "Reinstall flaskit from the latest git master."
+        ) from exc
 
 
 def _write(path: Path, content: str, *, force: bool = False) -> None:
@@ -88,7 +121,7 @@ def init_project(path: Path) -> None:
         "app.py": "project/app.py.j2",
         "config.py": "project/config.py.j2",
         "requirements.txt": "project/requirements.txt.j2",
-        # Template is env.example.j2 (no leading dot) so setuptools packages it
+        # No leading dot in template filename — setuptools omits dotfiles.
         ".env.example": "project/env.example.j2",
     }
 
@@ -99,7 +132,7 @@ def init_project(path: Path) -> None:
         _write(dest, _render(template_name, project_name=project_name))
 
     # Static Docker assets (not Jinja)
-    package_root = resources.files("flaskit").joinpath("templates/project")
+    package_root = _templates_root() / "project"
     for dest_name, src_name in (
         ("Dockerfile", "Dockerfile"),
         (".dockerignore", "dockerignore"),
@@ -107,7 +140,11 @@ def init_project(path: Path) -> None:
         dest = target / dest_name
         if dest.exists():
             raise click.ClickException(f"Project already initialized (found {dest_name})")
-        src = package_root.joinpath(src_name)
+        src = package_root / src_name
+        if not src.is_file():
+            raise click.ClickException(
+                f"Missing packaged file templates/project/{src_name}. Reinstall flaskit."
+            )
         dest.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
 
     _ensure_dir(target / "resources")
@@ -115,21 +152,25 @@ def init_project(path: Path) -> None:
     _ensure_dir(target / "assets" / "statics")
 
     # Local Swagger UI assets (no CDN)
-    swagger_src = resources.files("flaskit").joinpath("templates/project/assets/swagger-ui")
+    swagger_src = package_root / "assets" / "swagger-ui"
     swagger_dst = target / "assets" / "swagger-ui"
+    if not swagger_src.is_dir():
+        raise click.ClickException(
+            "Missing packaged swagger-ui assets. Reinstall flaskit from latest git."
+        )
     if swagger_dst.exists():
         shutil.rmtree(swagger_dst)
     shutil.copytree(swagger_src, swagger_dst)
 
     # Cached static files directory (browser Cache-Control)
-    statics_src = resources.files("flaskit").joinpath("templates/project/assets/statics")
+    statics_src = package_root / "assets" / "statics"
     statics_dst = target / "assets" / "statics"
     if statics_src.is_dir():
         for item in statics_src.iterdir():
             dest = statics_dst / item.name
             if not dest.exists():
                 if item.is_file():
-                    dest.write_bytes(item.read_bytes())
+                    shutil.copy2(item, dest)
                 elif item.is_dir():
                     shutil.copytree(item, dest)
 
@@ -152,7 +193,6 @@ def init_project(path: Path) -> None:
         f"     # production (bjoern, Docker only): "
         f"docker build --build-arg DOCKER_TAG=1.0.0 -t {project_name} ."
     )
-
 
 
 @main.group("generate")

@@ -2,7 +2,18 @@
 
 ## `TemplateNotFound: project/.env.example.j2`
 
-Fixed by shipping the template as `project/env.example.j2` (no leading dot). Setuptools omits dotfiles from package data. Reinstall flaskit after upgrading (`pip install -e .`).
+You are on an **old install** (pre-0.1.1). Setuptools omits templates whose names start with `.`; the file is now `project/env.example.j2`.
+
+Upgrade and reinstall (Homebrew / user site included):
+
+```bash
+pip uninstall flaskit -y
+pip install -U "git+https://github.com/mghorbani2357/flaskit.git@master"
+flaskit --version   # expect 0.1.1+
+flaskit init tpm
+```
+
+If `flaskit` still points at `/opt/homebrew/...`, uninstall that copy too (`pip3 uninstall flaskit` / `brew` unlink) until `which flaskit` matches the upgraded environment.
 
 ## Is flaskit a Flask extension?
 
