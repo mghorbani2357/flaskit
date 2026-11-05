@@ -1,0 +1,3 @@
+graft flaskit/templates
+global-exclude __pycache__ *.py[cod] *.pyo
+recursive-include flaskit/templates *

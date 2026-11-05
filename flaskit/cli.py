@@ -88,7 +88,8 @@ def init_project(path: Path) -> None:
         "app.py": "project/app.py.j2",
         "config.py": "project/config.py.j2",
         "requirements.txt": "project/requirements.txt.j2",
-        ".env.example": "project/.env.example.j2",
+        # Template is env.example.j2 (no leading dot) so setuptools packages it
+        ".env.example": "project/env.example.j2",
     }
 
     for dest_name, template_name in project_files.items():

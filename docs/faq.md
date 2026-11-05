@@ -1,5 +1,9 @@
 # FAQ
 
+## `TemplateNotFound: project/.env.example.j2`
+
+Fixed by shipping the template as `project/env.example.j2` (no leading dot). Setuptools omits dotfiles from package data. Reinstall flaskit after upgrading (`pip install -e .`).
+
 ## Is flaskit a Flask extension?
 
 No. It is a **CLI scaffold**. Generated projects run without importing `flaskit`.

@@ -35,6 +35,14 @@ docs = [
     "mkdocs-material>=9.0",
     "pymdown-extensions>=10.0",
 ]
+test = [
+    "pytest>=7.0",
+    "Flask>=3.0",
+    "flask-smorest>=0.44",
+    "marshmallow>=3.20",
+    "webargs>=8.3",
+    "apispec>=6.3",
+]
 
 [project.scripts]
 flaskit = "flaskit.cli:main"
@@ -43,8 +51,18 @@ flaskit = "flaskit.cli:main"
 Homepage = "https://github.com/flaskit/flaskit"
 Documentation = "https://flaskit.readthedocs.io/"
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.packages.find]
 include = ["flaskit*"]
 
 [tool.setuptools.package-data]
-flaskit = ["templates/**/*"]
+flaskit = [
+    "templates/**/*",
+    "templates/**/.*",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
