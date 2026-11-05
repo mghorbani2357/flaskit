@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Python **3.10+**
+- Python **3.10+** (3.11–3.13 recommended; 3.14 needs marshmallow 4.x — handled in generated `requirements.txt`)
 - `pip`
 
 ## Install flaskit (the CLI)

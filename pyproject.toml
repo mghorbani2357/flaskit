@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flaskit"
-version = "0.1.1"
+version = "0.1.2"
 description = "CLI scaffolding tool for Flask-Smorest projects with modular resources and Swagger definitions"
 readme = "README.md"
 license = { text = "GPL-3.0-or-later" }
@@ -42,7 +42,7 @@ test = [
     "build>=1.0",
     "Flask>=3.0",
     "flask-smorest>=0.44",
-    "marshmallow>=3.20",
+    "marshmallow>=3.24.1,<5",
     "webargs>=8.3",
     "apispec>=6.3",
 ]

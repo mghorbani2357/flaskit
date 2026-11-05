@@ -71,6 +71,16 @@ def test_init_requirements_exclude_bjoern(runner: CliRunner, project_dir: Path) 
     assert "bjoern" in dockerfile
 
 
+def test_init_requirements_marshmallow_python314_marker(
+    runner: CliRunner, project_dir: Path
+) -> None:
+    result = runner.invoke(main, ["init", str(project_dir)])
+    assert result.exit_code == 0, result.output
+    reqs = (project_dir / "requirements.txt").read_text(encoding="utf-8")
+    assert 'marshmallow>=4.1.0,<5; python_version >= "3.14"' in reqs
+    assert 'marshmallow>=3.24.1,<5; python_version < "3.14"' in reqs
+
+
 def test_init_app_has_core_hooks(runner: CliRunner, project_dir: Path) -> None:
     result = runner.invoke(main, ["init", str(project_dir)])
     assert result.exit_code == 0, result.output

@@ -1,5 +1,21 @@
 # FAQ
 
+## `No matching distribution found for marshmallow>=3.20`
+
+On **Python 3.14**, marshmallow 3.x is not installable from PyPI. Generated projects now depend on:
+
+- `marshmallow>=4.1.0,<5` when `python_version >= 3.14`
+- `marshmallow>=3.24.1,<5` on older Pythons
+
+Upgrade flaskit, re-init (or edit `requirements.txt`), then:
+
+```bash
+python3 -m pip install -U pip
+pip install -r requirements.txt
+```
+
+Prefer Python **3.11–3.13** if you want the broadest dependency support.
+
 ## `TemplateNotFound: project/.env.example.j2`
 
 You are on an **old install** (pre-0.1.1). Setuptools omits templates whose names start with `.`; the file is now `project/env.example.j2`.
