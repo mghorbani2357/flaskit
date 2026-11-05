@@ -1,0 +1,8 @@
+"""Flask blueprint for the {{ name }} module."""
+
+from flask import Blueprint
+
+# Mount path under app BASE_PATH (from config / env). Example final route: {BASE_PATH}{URL_PREFIX}/
+URL_PREFIX = "/{{ name }}"
+
+bp = Blueprint("{{ name }}", __name__)

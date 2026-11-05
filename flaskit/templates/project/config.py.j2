@@ -1,0 +1,100 @@
+"""Flat config from environment variables."""
+
+import os
+
+
+def _env(key, default=None):
+    value = os.environ.get(key)
+    if value is None or value == "":
+        return default
+    return value
+
+
+def _env_bool(key, default=False):
+    value = _env(key)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+# API / Swagger
+API_TITLE = _env("API_TITLE", "{{ project_name }}")
+API_DESCRIPTION = _env("API_DESCRIPTION", "{{ project_name }} API")
+API_VERSION = _env("API_VERSION", "1.0.0")
+OPENAPI_VERSION = _env("OPENAPI_VERSION", "3.0.3")
+BASE_PATH = _env("BASE_PATH", "/") or "/"
+DOCS_PATH = (_env("DOCS_PATH", "/docs") or "/docs").rstrip("/") or "/docs"
+
+# Server / runtime
+# ENV=development -> Flask built-in server; ENV=production -> bjoern (libev)
+ENV = (_env("ENV", _env("FLASK_ENV", "development")) or "development").lower()
+DEBUG = _env_bool("DEBUG", ENV in {"development", "dev"})
+HOST = _env("HOST", "127.0.0.1")
+PORT = int(_env("PORT", "5000") or "5000")
+# bjoern reuse_port helps multi-process bind on the same port (Linux)
+BJOERN_REUSE_PORT = _env_bool("BJOERN_REUSE_PORT", True)
+
+# Auth (Swagger Authorize)
+AUTH_SCHEME = (_env("AUTH_SCHEME", "bearer") or "bearer").lower()
+AUTH_HEADER = _env("AUTH_HEADER", "Authorization") or "Authorization"
+AUTH_BEARER_FORMAT = _env("AUTH_BEARER_FORMAT", "JWT") or "JWT"
+AUTH_SECURITY_NAME = _env("AUTH_SECURITY_NAME", "httpAuth") or "httpAuth"
+
+# Logging — shared
+LOG_LEVEL = (_env("LOG_LEVEL", "INFO") or "INFO").upper()
+LOG_OUTPUT = [
+    part.strip().lower()
+    for part in (_env("LOG_OUTPUT", "stream,file") or "stream,file").split(",")
+    if part.strip()
+]
+LOG_STREAM = (_env("LOG_STREAM", "stderr") or "stderr").lower()
+LOG_FORMAT = _env("LOG_FORMAT", "%(message)s") or "%(message)s"
+LOG_DATE_FORMAT = _env("LOG_DATE_FORMAT", "%Y-%m-%d %H:%M:%S") or "%Y-%m-%d %H:%M:%S"
+LOG_ROTATION = (_env("LOG_ROTATION", "size") or "size").lower()
+LOG_MAX_BYTES = int(_env("LOG_MAX_BYTES", "1048576") or "1048576")
+LOG_BACKUP_COUNT = int(_env("LOG_BACKUP_COUNT", "5") or "5")
+LOG_WHEN = _env("LOG_WHEN", "midnight") or "midnight"
+LOG_INTERVAL = int(_env("LOG_INTERVAL", "1") or "1")
+LOG_PROPAGATE = _env_bool("LOG_PROPAGATE", False)
+# Headers never written to request/response logs (comma-separated, case-insensitive)
+LOG_REDACT_HEADERS = [
+    part.strip().lower()
+    for part in (
+        _env("LOG_REDACT_HEADERS", "authorization,cookie,set-cookie,x-api-key")
+        or "authorization,cookie,set-cookie,x-api-key"
+    ).split(",")
+    if part.strip()
+]
+
+# Per-purpose loggers (app / request / response)
+LOG_APP_NAME = _env("LOG_APP_NAME", "flask.app") or "flask.app"
+LOG_APP_FILE = _env("LOG_APP_FILE", "logs/app.log") or "logs/app.log"
+LOG_REQUEST_NAME = _env("LOG_REQUEST_NAME", "werkzeug.request") or "werkzeug.request"
+LOG_REQUEST_FILE = _env("LOG_REQUEST_FILE", "logs/request.log") or "logs/request.log"
+LOG_RESPONSE_NAME = _env("LOG_RESPONSE_NAME", "werkzeug.response") or "werkzeug.response"
+LOG_RESPONSE_FILE = _env("LOG_RESPONSE_FILE", "logs/response.log") or "logs/response.log"
+
+# OpenTelemetry
+OTEL_ENABLED = _env_bool("OTEL_ENABLED", False)
+OTEL_SERVICE_NAME = _env("OTEL_SERVICE_NAME", "{{ project_name }}") or "{{ project_name }}"
+OTEL_EXPORTER_OTLP_ENDPOINT = _env("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
+OTEL_EXPORTER_OTLP_PROTOCOL = (_env("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc") or "grpc").lower()
+
+# Static files under assets/statics/ (URL: /assets/statics/...) — browser cache TTL
+STATIC_CACHE_MAX_AGE = int(_env("STATIC_CACHE_MAX_AGE", "604800") or "604800")  # 7 days
+
+# Flask
+SECRET_KEY = _env("SECRET_KEY", "change-me") or "change-me"
+
+
+def route_prefix(blueprint_path: str) -> str:
+    """Combine app BASE_PATH with a module blueprint URL_PREFIX."""
+    parts = []
+    if not BASE_PATH.startswith(("http://", "https://")):
+        base = BASE_PATH.strip("/")
+        if base:
+            parts.append(base)
+    bp = (blueprint_path or "").strip("/")
+    if bp:
+        parts.append(bp)
+    return "/" + "/".join(parts) if parts else "/"
