@@ -1,8 +1,8 @@
+# Use Python 3.11–3.13 (see .python-version). Python 3.14 often cannot
+# install marshmallow/flask-smorest from PyPI or common mirrors yet.
 Flask>=3.0
 flask-smorest>=0.44
-# marshmallow 3.x has no usable 3.14 builds; 4.x is required on Python 3.14+
-marshmallow>=4.1.0,<5; python_version >= "3.14"
-marshmallow>=3.24.1,<5; python_version < "3.14"
+marshmallow>=3.24.1,<5
 webargs>=8.3
 apispec>=6.3
 # bjoern is installed only in Docker (see Dockerfile) — needs libev / Linux

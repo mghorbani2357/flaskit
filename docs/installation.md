@@ -2,7 +2,8 @@
 
 ## Requirements
 
-- Python **3.10+** (3.11–3.13 recommended; 3.14 needs marshmallow 4.x — handled in generated `requirements.txt`)
+- Python **3.10+** for the flaskit CLI
+- Python **3.11–3.13** (3.12 recommended) for generated apps — **avoid 3.14** until marshmallow/flask-smorest install cleanly on it
 - `pip`
 
 ## Install flaskit (the CLI)

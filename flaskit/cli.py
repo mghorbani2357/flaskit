@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import re
 import shutil
+import sys
 from importlib import resources
 from pathlib import Path
 
@@ -117,6 +118,19 @@ def init_project(path: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     project_name = target.name
 
+    if sys.version_info >= (3, 14):
+        click.echo(
+            "WARNING: Python "
+            f"{sys.version_info.major}.{sys.version_info.minor} detected. "
+            "Generated apps expect Python 3.11–3.13. "
+            "On 3.14, pip often fails with "
+            "'No matching distribution found for marshmallow...'. "
+            "Create the venv with Python 3.12, e.g.:\n"
+            "  brew install python@3.12\n"
+            "  /opt/homebrew/opt/python@3.12/bin/python3.12 -m venv .venv",
+            err=True,
+        )
+
     project_files = {
         "app.py": "project/app.py.j2",
         "config.py": "project/config.py.j2",
@@ -136,6 +150,7 @@ def init_project(path: Path) -> None:
     for dest_name, src_name in (
         ("Dockerfile", "Dockerfile"),
         (".dockerignore", "dockerignore"),
+        (".python-version", "python-version"),
     ):
         dest = target / dest_name
         if dest.exists():
@@ -185,8 +200,8 @@ def init_project(path: Path) -> None:
         except ValueError:
             cd_arg = str(target)
         click.echo(f"  1. cd {cd_arg}")
-    click.echo("  2. python -m venv .venv && activate it")
-    click.echo("  3. pip install -r requirements.txt")
+    click.echo("  2. python3.12 -m venv .venv && activate it  # 3.11–3.13 required")
+    click.echo("  3. pip install -U pip && pip install -r requirements.txt")
     click.echo("  4. flaskit generate module <name>")
     click.echo("  5. python app.py   # ENV=development (Flask)")
     click.echo(

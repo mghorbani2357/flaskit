@@ -2,5 +2,6 @@ graft flaskit/templates
 include flaskit/templates/project/env.example.j2
 include flaskit/templates/project/dockerignore
 include flaskit/templates/project/Dockerfile
-recursive-include flaskit/templates *.j2 *.css *.js *.txt *.keep Dockerfile dockerignore
+include flaskit/templates/project/python-version
+recursive-include flaskit/templates *.j2 *.css *.js *.txt *.keep Dockerfile dockerignore python-version
 global-exclude __pycache__ *.py[cod] *.pyo .gitkeep

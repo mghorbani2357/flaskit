@@ -16,6 +16,7 @@ EXPECTED_ROOT_FILES = (
     ".env.example",
     "Dockerfile",
     ".dockerignore",
+    ".python-version",
 )
 
 
@@ -71,14 +72,15 @@ def test_init_requirements_exclude_bjoern(runner: CliRunner, project_dir: Path) 
     assert "bjoern" in dockerfile
 
 
-def test_init_requirements_marshmallow_python314_marker(
+def test_init_writes_python_version_and_marshmallow_pin(
     runner: CliRunner, project_dir: Path
 ) -> None:
     result = runner.invoke(main, ["init", str(project_dir)])
     assert result.exit_code == 0, result.output
+    assert (project_dir / ".python-version").read_text(encoding="utf-8").strip() == "3.12"
     reqs = (project_dir / "requirements.txt").read_text(encoding="utf-8")
-    assert 'marshmallow>=4.1.0,<5; python_version >= "3.14"' in reqs
-    assert 'marshmallow>=3.24.1,<5; python_version < "3.14"' in reqs
+    assert "marshmallow>=3.24.1,<5" in reqs
+    assert "3.11–3.13" in reqs or "3.11-3.13" in reqs or "3.14" in reqs
 
 
 def test_init_app_has_core_hooks(runner: CliRunner, project_dir: Path) -> None:

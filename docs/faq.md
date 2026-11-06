@@ -1,20 +1,23 @@
 # FAQ
 
-## `No matching distribution found for marshmallow>=3.20`
+## `No matching distribution found for marshmallow...`
 
-On **Python 3.14**, marshmallow 3.x is not installable from PyPI. Generated projects now depend on:
+**Cause:** the venv is almost certainly **Python 3.14**. Marshmallow / flask-smorest are not reliably installable on 3.14 from PyPI (and many mirrors) yet.
 
-- `marshmallow>=4.1.0,<5` when `python_version >= 3.14`
-- `marshmallow>=3.24.1,<5` on older Pythons
-
-Upgrade flaskit, re-init (or edit `requirements.txt`), then:
+**Fix: use Python 3.12**
 
 ```bash
-python3 -m pip install -U pip
+brew install python@3.12
+cd your-project
+rm -rf .venv
+/opt/homebrew/opt/python@3.12/bin/python3.12 -m venv .venv
+source .venv/bin/activate
+python -V          # should show 3.12.x
+pip install -U pip
 pip install -r requirements.txt
 ```
 
-Prefer Python **3.11–3.13** if you want the broadest dependency support.
+Generated projects include `.python-version` set to `3.12`. Supported range for app deps: **3.11–3.13**.
 
 ## `TemplateNotFound: project/.env.example.j2`
 
