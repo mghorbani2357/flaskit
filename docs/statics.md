@@ -1,38 +1,36 @@
-# Static files (`assets/statics`)
+# Static files
 
-Put public files (images, CSS, JS, fonts, downloads) in:
-
-```text
-assets/statics/
-```
-
-They are served by Flask’s static folder at:
+## Layout
 
 ```text
-/assets/statics/<filename>
+assets/
+  swagger-ui/    # Swagger UI (do not put app files here)
+  statics/       # your public files
 ```
 
-Example: `assets/statics/logo.png` → `http://127.0.0.1:5000/assets/statics/logo.png`
+Place images, CSS, JS, downloads under `assets/statics/`.
 
-## Browser caching
+## URLs
 
-Responses under `/assets/statics/` get:
+Served at `{BASE_PATH}/assets/statics/...`.
+
+| `BASE_PATH` | Example file | URL |
+|-------------|--------------|-----|
+| `/` | `logo.png` | `/assets/statics/logo.png` |
+| `/api` | `logo.png` | `/api/assets/statics/logo.png` |
+
+Flask `static_folder` is `assets` and `static_url_path` is `config.assets_url_path()` so **all** assets (Swagger UI and statics) respect `BASE_PATH`.
+
+## Cache-Control
+
+Responses under `{BASE_PATH}/assets/statics` receive:
 
 ```http
-Cache-Control: public, max-age=604800
+Cache-Control: public, max-age=<STATIC_CACHE_MAX_AGE>
 ```
 
-Default TTL is **7 days** (`604800` seconds). Override with:
+Default TTL is `604800` (7 days). Set `STATIC_CACHE_MAX_AGE=0` for `no-cache`.
 
-```bash
-STATIC_CACHE_MAX_AGE=31536000   # 1 year
-```
+## Documentation for assets
 
-Set `STATIC_CACHE_MAX_AGE=0` to send `Cache-Control: no-cache`.
-
-Flask still emits `ETag` / `Last-Modified` for conditional requests (`304`).
-
-## Notes
-
-- `swagger-ui/` stays separate under `assets/swagger-ui/` (docs UI assets).
-- `flaskit init` creates an empty `assets/statics/` directory for you.
+Do not put README files under `assets/`. Project manuals live in the flaskit `docs/` tree (or your own project docs). The scaffold creates empty `statics/` without placeholder text files.

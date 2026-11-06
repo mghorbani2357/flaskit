@@ -39,7 +39,9 @@ def test_wheel_contains_env_example_template(built_wheel: Path) -> None:
     assert "flaskit/templates/project/Dockerfile" in names
     assert "flaskit/templates/project/dockerignore" in names
     assert "flaskit/templates/project/python-version" in names
+    assert "flaskit/templates/project/templates/swagger_ui.html" in names
     assert any(n.endswith("swagger-ui/swagger-ui.css") for n in names)
+    assert not any(n.endswith(".gitkeep") for n in names)
 
 
 def test_wheel_install_init_succeeds(built_wheel: Path, tmp_path: Path) -> None:

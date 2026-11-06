@@ -2,34 +2,56 @@
 
 ## Requirements
 
-- Python **3.10+** for the flaskit CLI
-- Python **3.11–3.13** (3.12 recommended) for generated apps — **avoid 3.14** until marshmallow/flask-smorest install cleanly on it
-- `pip`
+| Component | Python |
+|-----------|--------|
+| flaskit CLI | **3.10+** |
+| Generated applications | **3.11–3.13** (**3.12** recommended) |
 
-## Install flaskit (the CLI)
+!!! warning "Avoid Python 3.14 for generated apps"
+    Marshmallow / flask-smorest often fail to install on 3.14 from PyPI. Use 3.12 and the generated `.python-version` file.
 
-From the repository root:
+## Install the CLI
 
-```bash
-pip install -e .
-```
+=== "PyPI"
 
-Or with docs tooling:
+    ```bash
+    pip install flaskit
+    ```
 
-```bash
-pip install -e ".[docs]"
-```
+=== "Editable (development)"
+
+    ```bash
+    git clone https://github.com/mghorbani2357/flaskit.git
+    cd flaskit
+    pip install -e .
+    ```
+
+=== "With docs tooling"
+
+    ```bash
+    pip install -e ".[docs]"
+    ```
+
+=== "With test extras"
+
+    ```bash
+    pip install -e ".[test]"
+    ```
 
 Verify:
 
 ```bash
 flaskit -h
-# or
+flaskit --version
 python -m flaskit -h
 ```
 
-`-h` and `--help` both work.
+## What the CLI depends on
 
-## What gets installed
+flaskit itself only needs **Click** and **Jinja2**. Flask, Smorest, OpenTelemetry, and related packages are written into each project’s `requirements.txt` by `flaskit init`.
 
-flaskit itself only depends on **Click** and **Jinja2**. Runtime stacks (Flask, Smorest, OpenTelemetry, …) are written into each generated project’s `requirements.txt` when you run `flaskit init`. **bjoern** is installed only inside the Docker image (not via `pip install -r requirements.txt`).
+**bjoern** is installed only inside the Docker image (not via `pip install -r requirements.txt`).
+
+## Versioning
+
+The published package version comes from **git tags** via `setuptools-scm` (for example `v0.2.0`). See [Publishing](publishing.md).

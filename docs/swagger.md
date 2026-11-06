@@ -2,33 +2,40 @@
 
 ## Local assets (no CDN)
 
-`flaskit init` copies Swagger UI into `assets/swagger-ui/`. The app serves them at `/assets/swagger-ui/...`. Offline and air-gapped friendly.
+The UI page is Jinja: `templates/swagger_ui.html`. CSS/JS live under `assets/swagger-ui/` and are served as Flask static files at `{BASE_PATH}/assets/swagger-ui/...`.
 
-## Multi-definition UI
+Docs URL: `{BASE_PATH}{DOCS_PATH}` (default `/docs`).
 
-`/docs` (configurable via `DOCS_PATH`) loads Swagger UI with:
+## Multi-definition header
 
-- **All modules** → `{DOCS_PATH}/openapi.json`
-- One entry per resource → `{DOCS_PATH}/modules/<name>/openapi.json`
+The top dropdown includes:
 
-Module specs are filtered by OpenAPI tag so each tab shows only that module’s operations.
+- **All modules** → `{docs}/openapi.json`
+- One entry per resource → `{docs}/modules/<name>/openapi.json`
 
-## Title and description
-
-From config / env:
-
-- `API_TITLE` — page title (defaults to the init project name)
-- `API_DESCRIPTION` — OpenAPI `info.description`
-- `API_VERSION` — OpenAPI version string
+`persistAuthorization` keeps the Bearer (or API key) token when switching definitions.
 
 ## Servers dropdown
 
-The OpenAPI `servers` array is **omitted** when `BASE_PATH` is unset, empty, or `/`.
+Shown only when `BASE_PATH` is set to something other than empty or `/`. Otherwise OpenAPI omits `servers` and the UI hides the Servers control.
 
-When `BASE_PATH` is a real prefix or URL (for example `/api` or `https://api.example.com`), the server entry is added and the Swagger Servers control is shown. Otherwise CSS + DOM cleanup hide Swagger’s default Servers chrome.
+```bash
+export BASE_PATH=/api
+python app.py
+# UI at http://127.0.0.1:5000/api/docs
+```
 
 ## Authorize
 
-Default security is **HTTP Bearer** (`AUTH_SCHEME=bearer`). Switch to API key header with `AUTH_SCHEME=apiKey`.
+Default security is HTTP Bearer (`AUTH_*` env vars). Change scheme to `apiKey` for header API keys.
 
-`persistAuthorization: true` keeps the token when switching definitions in the top dropdown.
+## Customizing the HTML
+
+Edit `templates/swagger_ui.html` in the generated project. Template variables:
+
+| Variable | Meaning |
+|----------|---------|
+| `title` | Page / API title |
+| `css_url`, `bundle_url`, `preset_url` | Asset URLs under `BASE_PATH` |
+| `urls` | Swagger UI `urls` array |
+| `show_servers` | Whether to show the Servers control |

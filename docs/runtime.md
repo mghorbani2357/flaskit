@@ -2,49 +2,49 @@
 
 ## Development (Flask)
 
-Default:
+Default when `ENV=development` (or unset):
 
 ```bash
 python app.py
-# or
 python app.py --host 0.0.0.0 -p 8082
-```
-
-Uses Werkzeug’s development server with optional `DEBUG`.
-
-Help:
-
-```bash
 python app.py -h
 ```
 
-| Flag | Meaning |
-|------|---------|
-| `-e` / `--env` | Override `ENV` (`development` / `production`) |
-| `--host` | Bind host |
-| `-p` / `--port` | Bind port |
-| `--debug` / `--no-debug` | Flask debug (dev only) |
+CLI flags override env for the process:
 
-You can also use Flask’s CLI:
+| Flag | Env |
+|------|-----|
+| `-e` / `--env` | `ENV` |
+| `--host` | `HOST` |
+| `-p` / `--port` | `PORT` |
+| `--debug` / `--no-debug` | `DEBUG` |
 
-```bash
-flask --app app:create_app run --host 0.0.0.0 --port 8082
-```
+## Production (bjoern)
 
-## Production (bjoern, Docker only)
+When `ENV=production` or `prod`, `app.py` runs **bjoern**. bjoern requires **libev** and is installed **only in the Docker image**, not via `requirements.txt`.
 
-[bjoern](https://github.com/jonashaag/bjoern) is **not** in `requirements.txt`. The Dockerfile installs it (with `libev`) so local `pip install -r requirements.txt` stays clean on Windows/macOS.
+Locally:
 
 ```bash
-docker build --build-arg DOCKER_TAG=1.0.0 -t myapi .
-docker run --rm -p 8080:80 myapi
+# This will exit with a clear error unless bjoern is installed
+ENV=production python app.py
 ```
 
-Inside the image, `ENV=production` makes `app.py` start bjoern. `BJOERN_REUSE_PORT=true` enables Linux `SO_REUSEPORT`.
+Use Docker for production-like serving — see [Docker](docker.md).
 
-## Environment selection
+## Cross-platform notes
 
-| `ENV` value | Server |
-|-------------|--------|
-| `development`, `dev` (default) | Flask |
-| `production`, `prod` | bjoern (available in Docker image) |
+| Topic | Guidance |
+|-------|----------|
+| Paths | Templates use `pathlib.Path`; works on Windows and POSIX |
+| Timezone | `zoneinfo` + `tzdata` dependency for IANA zones on Windows |
+| Ports | Prefer `PORT=8082` if 5000 is reserved |
+| Console encoding | Help text is ASCII-safe; set `PYTHONUTF8=1` if needed |
+| Shell env | Use `set` / `$env:` / `export` as appropriate — the app only reads `os.environ` |
+
+## Flask CLI
+
+```bash
+flask --app app:create_app run
+flask --app app:create_app list-modules
+```

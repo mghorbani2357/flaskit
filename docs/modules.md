@@ -10,18 +10,18 @@ Produces:
 
 ```text
 resources/users/
-  blueprint.py
-  resource.py
+  blueprint.py   # Flask blueprint: flask_bp
+  resource.py    # Smorest blueprint: smorest_blp
   schema.py
 ```
 
-## `blueprint.py`
-
-Flask blueprint plus mount path:
+## `blueprint.py` (Flask)
 
 ```python
 URL_PREFIX = "/users"
-bp = Blueprint("users", __name__)
+
+# Flask application blueprint (URL mounting / registration)
+flask_bp = Blueprint("users", __name__)
 ```
 
 Final routes: `{BASE_PATH}{URL_PREFIX}/...`  
@@ -29,7 +29,7 @@ Example with `BASE_PATH=/api` → `/api/users/`.
 
 ## `schema.py`
 
-Empty marshmallow schemas ready to fill:
+Empty marshmallow schemas:
 
 ```python
 class UsersRequest(Schema):
@@ -39,25 +39,41 @@ class UsersResponse(Schema):
     pass
 ```
 
-No database models — Smorest + marshmallow only.
+No database models — add persistence yourself (see [Extending](extending.md)).
 
-## `resource.py`
+## `resource.py` (Smorest)
 
-CRUD stubs with Smorest annotations:
+```python
+# Flask-Smorest blueprint (OpenAPI / request-response schemas)
+smorest_blp = SmorestBlueprint("users_api", __name__, description="Users")
 
-| Method | Path | Stub behavior |
-|--------|------|----------------|
+@smorest_blp.route("/")
+class UsersList(MethodView):
+    ...
+
+flask_bp.register_blueprint(smorest_blp)
+```
+
+| Method | Path | Stub |
+|--------|------|------|
 | `GET` | `/` | `[]` |
 | `POST` | `/` | `{}` (201) |
 | `GET` | `/<id>` | `{}` |
 | `PATCH` | `/<id>` | `{}` |
 | `DELETE` | `/<id>` | `204` |
 
-Each operation is tagged for the module name so Swagger can filter per definition.
+Operations are tagged with the module name for per-definition Swagger filtering.
+
+## Naming convention
+
+| Variable | Blueprint type |
+|----------|----------------|
+| `flask_bp` | Flask `Blueprint` |
+| `smorest_blp` | Flask-Smorest `Blueprint` |
+
+Use these names so discovery and docs stay consistent.
 
 ## Listing modules
-
-Generated apps register a Flask CLI command:
 
 ```bash
 flask --app app:create_app list-modules

@@ -29,9 +29,15 @@ def test_generate_module_creates_files(runner: CliRunner, project_dir: Path) -> 
     resource = (module / "resource.py").read_text(encoding="utf-8")
     schema = (module / "schema.py").read_text(encoding="utf-8")
     assert 'URL_PREFIX = "/users"' in blueprint
+    assert "flask_bp = Blueprint" in blueprint
+    assert "Flask application blueprint" in blueprint or "flask_bp" in blueprint
+    assert "smorest_blp = SmorestBlueprint" in resource
+    assert "Flask-Smorest blueprint" in resource
     assert "class UsersList" in resource
     assert "class UsersRequest" in schema
     assert "class UsersResponse" in schema
+    assert "flask_bp" in result.output
+    assert "smorest_blp" in result.output
 
 
 def test_generate_module_snake_case(runner: CliRunner, project_dir: Path) -> None:

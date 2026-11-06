@@ -1,6 +1,9 @@
 """Flat config from environment variables."""
 
+from __future__ import annotations
+
 import os
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 
 def _env(key, default=None):
@@ -25,13 +28,21 @@ OPENAPI_VERSION = _env("OPENAPI_VERSION", "3.0.3")
 BASE_PATH = _env("BASE_PATH", "/") or "/"
 DOCS_PATH = (_env("DOCS_PATH", "/docs") or "/docs").rstrip("/") or "/docs"
 
+# Timezone (IANA name, e.g. UTC, Asia/Tehran, America/New_York)
+# Prefer TIMEZONE; fall back to TZ (common on Linux / containers).
+TIMEZONE = _env("TIMEZONE", _env("TZ", "UTC")) or "UTC"
+try:
+    TZ = ZoneInfo(TIMEZONE)
+except ZoneInfoNotFoundError:
+    TZ = ZoneInfo("UTC")
+    TIMEZONE = "UTC"
+
 # Server / runtime
-# ENV=development -> Flask built-in server; ENV=production -> bjoern (libev)
+# ENV=development -> Flask built-in server; ENV=production -> bjoern (Docker/Linux)
 ENV = (_env("ENV", _env("FLASK_ENV", "development")) or "development").lower()
 DEBUG = _env_bool("DEBUG", ENV in {"development", "dev"})
 HOST = _env("HOST", "127.0.0.1")
 PORT = int(_env("PORT", "5000") or "5000")
-# bjoern reuse_port helps multi-process bind on the same port (Linux)
 BJOERN_REUSE_PORT = _env_bool("BJOERN_REUSE_PORT", True)
 
 # Auth (Swagger Authorize)
@@ -40,7 +51,7 @@ AUTH_HEADER = _env("AUTH_HEADER", "Authorization") or "Authorization"
 AUTH_BEARER_FORMAT = _env("AUTH_BEARER_FORMAT", "JWT") or "JWT"
 AUTH_SECURITY_NAME = _env("AUTH_SECURITY_NAME", "httpAuth") or "httpAuth"
 
-# Logging — shared
+# Logging — shared (stdlib + optional OpenTelemetry log bridge)
 LOG_LEVEL = (_env("LOG_LEVEL", "INFO") or "INFO").upper()
 LOG_OUTPUT = [
     part.strip().lower()
@@ -56,7 +67,6 @@ LOG_BACKUP_COUNT = int(_env("LOG_BACKUP_COUNT", "5") or "5")
 LOG_WHEN = _env("LOG_WHEN", "midnight") or "midnight"
 LOG_INTERVAL = int(_env("LOG_INTERVAL", "1") or "1")
 LOG_PROPAGATE = _env_bool("LOG_PROPAGATE", False)
-# Headers never written to request/response logs (comma-separated, case-insensitive)
 LOG_REDACT_HEADERS = [
     part.strip().lower()
     for part in (
@@ -66,7 +76,6 @@ LOG_REDACT_HEADERS = [
     if part.strip()
 ]
 
-# Per-purpose loggers (app / request / response)
 LOG_APP_NAME = _env("LOG_APP_NAME", "flask.app") or "flask.app"
 LOG_APP_FILE = _env("LOG_APP_FILE", "logs/app.log") or "logs/app.log"
 LOG_REQUEST_NAME = _env("LOG_REQUEST_NAME", "werkzeug.request") or "werkzeug.request"
@@ -74,27 +83,45 @@ LOG_REQUEST_FILE = _env("LOG_REQUEST_FILE", "logs/request.log") or "logs/request
 LOG_RESPONSE_NAME = _env("LOG_RESPONSE_NAME", "werkzeug.response") or "werkzeug.response"
 LOG_RESPONSE_FILE = _env("LOG_RESPONSE_FILE", "logs/response.log") or "logs/response.log"
 
-# OpenTelemetry
+# OpenTelemetry (traces + optional log export)
 OTEL_ENABLED = _env_bool("OTEL_ENABLED", False)
 OTEL_SERVICE_NAME = _env("OTEL_SERVICE_NAME", "{{ project_name }}") or "{{ project_name }}"
 OTEL_EXPORTER_OTLP_ENDPOINT = _env("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4317")
 OTEL_EXPORTER_OTLP_PROTOCOL = (_env("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc") or "grpc").lower()
+OTEL_LOGS_ENABLED = _env_bool("OTEL_LOGS_ENABLED", OTEL_ENABLED)
 
-# Static files under assets/statics/ (URL: /assets/statics/...) — browser cache TTL
-STATIC_CACHE_MAX_AGE = int(_env("STATIC_CACHE_MAX_AGE", "604800") or "604800")  # 7 days
+# Static files under assets/statics/
+STATIC_CACHE_MAX_AGE = int(_env("STATIC_CACHE_MAX_AGE", "604800") or "604800")
 
 # Flask
 SECRET_KEY = _env("SECRET_KEY", "change-me") or "change-me"
 
 
-def route_prefix(blueprint_path: str) -> str:
-    """Combine app BASE_PATH with a module blueprint URL_PREFIX."""
-    parts = []
+def app_path(*parts: str) -> str:
+    """Join BASE_PATH with path segments for routes, docs, and assets."""
+    segments: list[str] = []
     if not BASE_PATH.startswith(("http://", "https://")):
         base = BASE_PATH.strip("/")
         if base:
-            parts.append(base)
-    bp = (blueprint_path or "").strip("/")
-    if bp:
-        parts.append(bp)
-    return "/" + "/".join(parts) if parts else "/"
+            segments.append(base)
+    for part in parts:
+        piece = (part or "").strip("/")
+        if piece:
+            segments.append(piece)
+    return "/" + "/".join(segments) if segments else "/"
+
+
+def route_prefix(blueprint_path: str) -> str:
+    """Combine app BASE_PATH with a module Flask blueprint URL_PREFIX."""
+    return app_path(blueprint_path)
+
+
+def docs_url_prefix() -> str:
+    """Docs mount path, always under BASE_PATH when BASE_PATH is path-like."""
+    docs = DOCS_PATH.strip("/") or "docs"
+    return app_path(docs)
+
+
+def assets_url_path() -> str:
+    """Flask static_url_path including BASE_PATH."""
+    return app_path("assets")

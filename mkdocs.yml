@@ -1,8 +1,8 @@
 site_name: flaskit
 site_description: CLI scaffolding for Flask-Smorest APIs with modular resources, Swagger, logging, and Docker.
 site_url: https://flaskit.readthedocs.io/
-repo_url: https://github.com/flaskit/flaskit
-edit_uri: edit/main/docs/
+repo_url: https://github.com/mghorbani2357/flaskit
+edit_uri: edit/master/docs/
 
 theme:
   name: material
@@ -40,6 +40,7 @@ nav:
   - CLI reference: cli.md
   - Architecture: architecture.md
   - Modules: modules.md
+  - Extending create_app: extending.md
   - Configuration: configuration.md
   - Logging: logging.md
   - Swagger UI: swagger.md
@@ -47,6 +48,7 @@ nav:
   - Runtime: runtime.md
   - Docker: docker.md
   - OpenTelemetry: opentelemetry.md
+  - Publishing: publishing.md
   - FAQ: faq.md
 
 plugins:

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="{{ css_url }}">
+  {% if not show_servers %}
+  <style>
+    .swagger-ui .scheme-container,
+    .swagger-ui .servers,
+    .swagger-ui .servers-title,
+    .swagger-ui .server-container,
+    .swagger-ui .operation-servers {
+      display: none !important;
+    }
+  </style>
+  {% endif %}
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="{{ bundle_url }}"></script>
+  <script src="{{ preset_url }}"></script>
+  <script>
+    window.onload = function () {
+      window.ui = SwaggerUIBundle({
+        urls: {{ urls | tojson }},
+        "urls.primaryName": "All modules",
+        dom_id: "#swagger-ui",
+        persistAuthorization: true,
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+        layout: "StandaloneLayout",
+        onComplete: function () {
+          {% if not show_servers %}
+          document.querySelectorAll(
+            ".swagger-ui .scheme-container, .swagger-ui .servers, .swagger-ui .server-container, .swagger-ui .operation-servers"
+          ).forEach(function (el) { el.remove(); });
+          {% endif %}
+        }
+      });
+    };
+  </script>
+</body>
+</html>

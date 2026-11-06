@@ -1,56 +1,77 @@
 # Quick start
 
+## 1. Scaffold
+
 ```bash
 flaskit init myapi
 cd myapi
-python -m venv .venv
 ```
 
-Activate the venv, then:
+## 2. Virtual environment (Python 3.12)
+
+=== "Linux / macOS"
+
+    ```bash
+    python3.12 -m venv .venv
+    source .venv/bin/activate
+    pip install -U pip
+    pip install -r requirements.txt
+    ```
+
+=== "Windows PowerShell"
+
+    ```powershell
+    py -3.12 -m venv .venv
+    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+    .\.venv\Scripts\Activate.ps1
+    python -m pip install -U pip
+    pip install -r requirements.txt
+    ```
+
+## 3. Add a module and run
 
 ```bash
-pip install -r requirements.txt
 flaskit generate module users
 python app.py
 ```
 
 Open http://127.0.0.1:5000/docs.
 
-!!! note "Windows PowerShell activation"
-    If scripts are blocked:
-
-    ```powershell
-    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-    .\.venv\Scripts\Activate.ps1
-    ```
-
-!!! tip "Port 5000 blocked on Windows"
-    Some Windows setups forbid binding to port 5000. Override:
-
+!!! tip "Port 5000 blocked (common on Windows)"
     ```powershell
     $env:HOST="127.0.0.1"
     $env:PORT="8082"
     python app.py
     ```
 
-## What was generated
+## Generated layout
 
 ```text
 myapi/
-  app.py              # create_app, init_app, Flask/bjoern entry
-  config.py           # flat UPPER_CASE settings from env
+  app.py
+  config.py
   requirements.txt
   Dockerfile
   .dockerignore
+  .python-version      # 3.12
   .env.example
+  templates/
+    swagger_ui.html
   resources/
     users/
-      blueprint.py    # Flask Blueprint + URL_PREFIX
-      resource.py     # Smorest CRUD stubs
-      schema.py       # empty Request / Response schemas
+      blueprint.py     # flask_bp (Flask)
+      resource.py      # smorest_blp (Smorest)
+      schema.py
   assets/
-    swagger-ui/       # local CSS/JS (no CDN)
-    statics/          # your static files (browser-cached)
+    swagger-ui/
+    statics/
 ```
 
-Swagger title defaults to the init folder name (`myapi`). Change it with `API_TITLE`.
+Swagger title defaults to the folder name (`myapi`). Override with `API_TITLE`.
+
+## Next steps
+
+- Mount under a prefix: set `BASE_PATH=/api` — routes, docs, and assets all move under `/api`
+- Set timezone: `TIMEZONE=Asia/Tehran`
+- Add a database or other extensions: [Extending create_app](extending.md)
+- Build for production: [Docker](docker.md)

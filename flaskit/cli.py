@@ -15,7 +15,6 @@ from jinja2 import select_autoescape
 
 MODULE_NAME_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 
-# Old packaged name (dotfile) was dropped by setuptools; keep alias for safety.
 TEMPLATE_ALIASES = {
     "project/.env.example.j2": "project/env.example.j2",
 }
@@ -27,7 +26,6 @@ def _templates_root() -> Path:
     try:
         path = Path(os.fspath(traversable))  # type: ignore[arg-type]
     except TypeError:
-        # Namespace / zip fallback
         path = Path(str(traversable))
     if not path.is_dir():
         raise click.ClickException(
@@ -56,7 +54,7 @@ def _render(template_name: str, **context: object) -> str:
         raise click.ClickException(
             f"Template not found: {template_name} (resolved: {name}). "
             f"Available: {', '.join(available) or '(none)'}. "
-            "Reinstall flaskit from the latest git master."
+            "Reinstall flaskit from the latest git tag/master."
         ) from exc
 
 
@@ -68,10 +66,15 @@ def _write(path: Path, content: str, *, force: bool = False) -> None:
 
 
 def _ensure_dir(path: Path) -> None:
+    """Create an empty directory (no .gitkeep)."""
     path.mkdir(parents=True, exist_ok=True)
-    gitkeep = path / ".gitkeep"
-    if not any(path.iterdir()) and not gitkeep.exists():
-        gitkeep.write_text("", encoding="utf-8")
+
+
+def _copy_tree(src: Path, dst: Path) -> None:
+    """Copy a directory tree; works cross-platform."""
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(src, dst)
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -87,8 +90,9 @@ def main() -> None:
       python -m flaskit -h
 
     \b
-    After init:
-      cd myapi && python -m venv .venv
+    After init (use Python 3.12):
+      cd myapi
+      python3.12 -m venv .venv
       pip install -r requirements.txt
       flaskit generate module users
       python app.py
@@ -122,9 +126,7 @@ def init_project(path: Path) -> None:
         click.echo(
             "WARNING: Python "
             f"{sys.version_info.major}.{sys.version_info.minor} detected. "
-            "Generated apps expect Python 3.11–3.13. "
-            "On 3.14, pip often fails with "
-            "'No matching distribution found for marshmallow...'. "
+            "Generated apps expect Python 3.11-3.13 (3.12 recommended). "
             "Create the venv with Python 3.12, e.g.:\n"
             "  brew install python@3.12\n"
             "  /opt/homebrew/opt/python@3.12/bin/python3.12 -m venv .venv",
@@ -135,7 +137,6 @@ def init_project(path: Path) -> None:
         "app.py": "project/app.py.j2",
         "config.py": "project/config.py.j2",
         "requirements.txt": "project/requirements.txt.j2",
-        # No leading dot in template filename — setuptools omits dotfiles.
         ".env.example": "project/env.example.j2",
     }
 
@@ -145,7 +146,6 @@ def init_project(path: Path) -> None:
             raise click.ClickException(f"Project already initialized (found {dest_name})")
         _write(dest, _render(template_name, project_name=project_name))
 
-    # Static Docker assets (not Jinja)
     package_root = _templates_root() / "project"
     for dest_name, src_name in (
         ("Dockerfile", "Dockerfile"),
@@ -165,23 +165,30 @@ def init_project(path: Path) -> None:
     _ensure_dir(target / "resources")
     _ensure_dir(target / "assets")
     _ensure_dir(target / "assets" / "statics")
+    _ensure_dir(target / "templates")
 
-    # Local Swagger UI assets (no CDN)
     swagger_src = package_root / "assets" / "swagger-ui"
-    swagger_dst = target / "assets" / "swagger-ui"
     if not swagger_src.is_dir():
         raise click.ClickException(
-            "Missing packaged swagger-ui assets. Reinstall flaskit from latest git."
+            "Missing packaged swagger-ui assets. Reinstall flaskit from latest git tag."
         )
-    if swagger_dst.exists():
-        shutil.rmtree(swagger_dst)
-    shutil.copytree(swagger_src, swagger_dst)
+    _copy_tree(swagger_src, target / "assets" / "swagger-ui")
 
-    # Cached static files directory (browser Cache-Control)
+    swagger_html = package_root / "templates" / "swagger_ui.html"
+    if not swagger_html.is_file():
+        raise click.ClickException("Missing templates/swagger_ui.html in package.")
+    _write(
+        target / "templates" / "swagger_ui.html",
+        swagger_html.read_text(encoding="utf-8"),
+        force=True,
+    )
+
     statics_src = package_root / "assets" / "statics"
     statics_dst = target / "assets" / "statics"
     if statics_src.is_dir():
         for item in statics_src.iterdir():
+            if item.name.lower().startswith("readme"):
+                continue
             dest = statics_dst / item.name
             if not dest.exists():
                 if item.is_file():
@@ -200,7 +207,7 @@ def init_project(path: Path) -> None:
         except ValueError:
             cd_arg = str(target)
         click.echo(f"  1. cd {cd_arg}")
-    click.echo("  2. python3.12 -m venv .venv && activate it  # 3.11–3.13 required")
+    click.echo("  2. python3.12 -m venv .venv && activate it  # 3.11-3.13 required")
     click.echo("  3. pip install -U pip && pip install -r requirements.txt")
     click.echo("  4. flaskit generate module <name>")
     click.echo("  5. python app.py   # ENV=development (Flask)")
@@ -233,8 +240,7 @@ def generate() -> None:
 def generate_module(name: str, project_path: Path) -> None:
     """Generate a resource module under resources/<name>/.
 
-    NAME must be snake_case (e.g. users, order_items).
-    Creates blueprint.py, resource.py, and schema.py.
+    Creates Flask blueprint (flask_bp) + Smorest blueprint (smorest_blp) stubs.
 
     \b
     Examples:
@@ -280,7 +286,7 @@ def generate_module(name: str, project_path: Path) -> None:
         raise
 
     click.echo(f"Generated module resources/{name}/")
-    click.echo("  blueprint.py  resource.py  schema.py")
+    click.echo("  blueprint.py (flask_bp)  resource.py (smorest_blp)  schema.py")
     click.echo("Restart the app to pick up the module in Swagger.")
 
 

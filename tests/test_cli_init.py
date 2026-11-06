@@ -32,11 +32,16 @@ def test_init_creates_project_layout(runner: CliRunner, project_dir: Path) -> No
 
     assert (project_dir / "resources").is_dir()
     assert (project_dir / "assets" / "statics").is_dir()
+    assert (project_dir / "templates" / "swagger_ui.html").is_file()
     assert (project_dir / "assets" / "swagger-ui" / "swagger-ui.css").is_file()
     assert (project_dir / "assets" / "swagger-ui" / "swagger-ui-bundle.js").is_file()
     assert (
         project_dir / "assets" / "swagger-ui" / "swagger-ui-standalone-preset.js"
     ).is_file()
+
+    # No .gitkeep placeholders; empty dirs are just directories
+    assert not list(project_dir.rglob(".gitkeep"))
+    assert not (project_dir / "assets" / "statics" / "README.txt").exists()
 
 
 def test_init_seeds_title_from_folder_name(runner: CliRunner, tmp_path: Path) -> None:
@@ -47,7 +52,10 @@ def test_init_seeds_title_from_folder_name(runner: CliRunner, tmp_path: Path) ->
     env_example = (target / ".env.example").read_text(encoding="utf-8")
     config = (target / "config.py").read_text(encoding="utf-8")
     assert "API_TITLE=payments" in env_example
+    assert "TIMEZONE=UTC" in env_example
     assert 'API_TITLE = _env("API_TITLE", "payments")' in config
+    assert "TIMEZONE" in config
+    assert "ZoneInfo" in config
 
 
 def test_init_refuses_overwrite(runner: CliRunner, project_dir: Path) -> None:
@@ -68,8 +76,10 @@ def test_init_requirements_exclude_bjoern(runner: CliRunner, project_dir: Path) 
         if line.strip() and not line.strip().startswith("#")
     ]
     assert not any("bjoern" in line for line in install_lines)
+    assert any(line.startswith("tzdata") for line in install_lines)
     dockerfile = (project_dir / "Dockerfile").read_text(encoding="utf-8")
     assert "bjoern" in dockerfile
+    assert "python:3.13" in dockerfile
 
 
 def test_init_writes_python_version_and_marshmallow_pin(
@@ -92,11 +102,21 @@ def test_init_app_has_core_hooks(runner: CliRunner, project_dir: Path) -> None:
         "def init_app(",
         "def setup_static_caching(",
         "def _run_bjoern(",
-        "/assets/statics",
+        "assets/statics",
         "client_ip",
         "show_servers",
+        "render_template",
+        "flask_bp",
+        "smorest_blp",
+        "OTEL_LOGS_ENABLED",
+        "trace_id",
     ):
         assert needle in app_src, f"missing {needle}"
+    assert "page_number" not in app_src
+    assert "g.page" not in app_src
+    # Imports at top — no mid-file import of opentelemetry
+    after_create = app_src.split("def create_app", 1)[1]
+    assert "from opentelemetry" not in after_create
 
 
 def test_init_help_includes_examples(runner: CliRunner) -> None:

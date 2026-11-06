@@ -1,55 +1,38 @@
 # flaskit
 
-**flaskit** is a scaffolding CLI for **Flask + Flask-Smorest** APIs. It generates a standalone project; it is **not** a runtime library you import into an existing app.
+**flaskit** is a scaffolding CLI for **Flask + Flask-Smorest** APIs. It generates a self-contained project; generated apps do **not** import `flaskit` at runtime.
 
-Generated projects include:
+## What you get
 
-- Modular resources under `resources/` with **automatic discovery**
-- Flat `UPPER_CASE` config driven by environment variables
-- Local Swagger UI (no CDN) with per-module OpenAPI definitions
-- JSON request/response logging to console and/or files
-- Optional OpenTelemetry
-- Docker image with **Flask** in development and **bjoern** in production
+| Capability | Detail |
+|------------|--------|
+| Modular resources | `flaskit generate module` → `flask_bp` + `smorest_blp` + schemas |
+| Auto-discovery | Folders under `resources/` registered on startup |
+| Flat configuration | `UPPER_CASE` env vars in `config.py` |
+| `BASE_PATH` | Prefixes API routes, docs, and static assets |
+| Local Swagger UI | Served from Jinja `templates/swagger_ui.html` + `assets/swagger-ui/` (no CDN) |
+| Multi-definition OpenAPI | “All modules” plus one definition per resource |
+| JSON logging | App / request / response loggers → stream and/or file |
+| Timezone | `TIMEZONE` (IANA) on log payloads |
+| OpenTelemetry | Optional traces + log bridge respecting `LOG_OUTPUT` |
+| Docker | Python 3.13 multi-stage image; **bjoern** only in Docker |
+| Cross-platform | Windows / macOS / Linux; `tzdata` for IANA zones |
 
-## Feature checklist
+## Not included (by design)
 
-| Feature | Status |
-|---------|--------|
-| `flaskit init` scaffolds a full project | Yes |
-| `flaskit generate module` creates blueprint / resource / schema | Yes |
-| Smorest + marshmallow only (no ORM / DB layer) | Yes |
-| Flat env-based config (`API_TITLE`, `BASE_PATH`, …) | Yes |
-| Swagger title/description from config (title defaults to init name) | Yes |
-| `BASE_PATH` combines with each module `URL_PREFIX` | Yes |
-| Servers dropdown only when `BASE_PATH` is set (not empty / `/`) | Yes |
-| Multi-definition Swagger (“All modules” + one tab per module) | Yes |
-| Bearer auth in Swagger by default; `persistAuthorization` | Yes |
-| Local `assets/swagger-ui/` (no CDN) | Yes |
-| `assets/statics/` with browser `Cache-Control` | Yes |
-| Nested Smorest blueprint under Flask blueprint | Yes |
-| No `__init__.py` packages required (namespace / flat imports) | Yes |
-| Three loggers: app, request, response | Yes |
-| Bodies base64-logged only at `LOG_LEVEL=DEBUG` | Yes |
-| `client_ip` on request logs | Yes |
-| Console streaming (stderr by default, flushed) + optional files | Yes |
-| Header redaction (`authorization`, cookies, …) | Yes |
-| `create_app` factory + `init_app` registration | Yes |
-| `python app.py -h` and `flaskit -h` | Yes |
-| Dev = Flask; production = bjoern (installed only in Docker) | Yes |
-| Multi-stage Dockerfile; `DOCKER_TAG` → `API_VERSION` | Yes |
-| Optional OpenTelemetry (OTLP) | Yes |
+- No ORM or database layer — add your own in `create_app` (see [Extending](extending.md))
+- No CDN for Swagger — assets ship with the project
+- No `.gitkeep` placeholders — empty directories are created as directories
 
-## Docs in this folder
-
-These pages are plain Markdown. Edit them in any text editor, preview locally with MkDocs, or publish on [Read the Docs](https://readthedocs.io/).
+## Preview these docs
 
 ```bash
 pip install -e ".[docs]"
 mkdocs serve
 ```
 
-Then open http://127.0.0.1:8000.
+Open http://127.0.0.1:8000.
 
 ## License
 
-GPL-3.0-or-later. See the repository `LICENSE` file.
+GPL-3.0-or-later — see the repository `LICENSE` file.

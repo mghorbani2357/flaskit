@@ -1,43 +1,48 @@
 from flask.views import MethodView
-from flask_smorest import Blueprint
+from flask_smorest import Blueprint as SmorestBlueprint
 
-from resources.{{ name }}.blueprint import bp
+from resources.{{ name }}.blueprint import flask_bp
 from resources.{{ name }}.schema import {{ class_prefix }}Request, {{ class_prefix }}Response
 
-blp = Blueprint("{{ name }}_api", __name__, description="{{ title }}")
+# Flask-Smorest blueprint (OpenAPI / request-response schemas)
+smorest_blp = SmorestBlueprint(
+    "{{ name }}_api",
+    __name__,
+    description="{{ title }}",
+)
 
 
-@blp.route("/")
+@smorest_blp.route("/")
 class {{ class_prefix }}List(MethodView):
-    @blp.doc(tags=["{{ name }}"])
-    @blp.response(200, {{ class_prefix }}Response(many=True))
+    @smorest_blp.doc(tags=["{{ name }}"])
+    @smorest_blp.response(200, {{ class_prefix }}Response(many=True))
     def get(self):
         return []
 
-    @blp.doc(tags=["{{ name }}"])
-    @blp.arguments({{ class_prefix }}Request)
-    @blp.response(201, {{ class_prefix }}Response)
+    @smorest_blp.doc(tags=["{{ name }}"])
+    @smorest_blp.arguments({{ class_prefix }}Request)
+    @smorest_blp.response(201, {{ class_prefix }}Response)
     def post(self, body):
         return {}
 
 
-@blp.route("/<int:item_id>")
+@smorest_blp.route("/<int:item_id>")
 class {{ class_prefix }}Item(MethodView):
-    @blp.doc(tags=["{{ name }}"])
-    @blp.response(200, {{ class_prefix }}Response)
+    @smorest_blp.doc(tags=["{{ name }}"])
+    @smorest_blp.response(200, {{ class_prefix }}Response)
     def get(self, item_id):
         return {}
 
-    @blp.doc(tags=["{{ name }}"])
-    @blp.arguments({{ class_prefix }}Request)
-    @blp.response(200, {{ class_prefix }}Response)
+    @smorest_blp.doc(tags=["{{ name }}"])
+    @smorest_blp.arguments({{ class_prefix }}Request)
+    @smorest_blp.response(200, {{ class_prefix }}Response)
     def patch(self, body, item_id):
         return {}
 
-    @blp.doc(tags=["{{ name }}"])
-    @blp.response(204)
+    @smorest_blp.doc(tags=["{{ name }}"])
+    @smorest_blp.response(204)
     def delete(self, item_id):
         return None
 
 
-bp.register_blueprint(blp)
+flask_bp.register_blueprint(smorest_blp)

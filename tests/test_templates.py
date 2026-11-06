@@ -21,6 +21,8 @@ REQUIRED_TEMPLATES = (
 REQUIRED_STATIC = (
     "templates/project/Dockerfile",
     "templates/project/dockerignore",
+    "templates/project/python-version",
+    "templates/project/templates/swagger_ui.html",
     "templates/project/assets/swagger-ui/swagger-ui.css",
     "templates/project/assets/swagger-ui/swagger-ui-bundle.js",
     "templates/project/assets/swagger-ui/swagger-ui-standalone-preset.js",
@@ -61,3 +63,16 @@ def test_env_example_renders_project_name(jinja_env: Environment) -> None:
     text = jinja_env.get_template("project/env.example.j2").render(project_name="demoapi")
     assert "API_TITLE=demoapi" in text
     assert "API_DESCRIPTION=demoapi API" in text
+    assert "TIMEZONE=UTC" in text
+    assert "OTEL_LOGS_ENABLED" in text
+
+
+def test_module_templates_name_blueprints(jinja_env: Environment) -> None:
+    bp = jinja_env.get_template("module/blueprint.py.j2").render(
+        name="users", class_prefix="Users", title="Users"
+    )
+    res = jinja_env.get_template("module/resource.py.j2").render(
+        name="users", class_prefix="Users", title="Users"
+    )
+    assert "flask_bp" in bp
+    assert "smorest_blp" in res

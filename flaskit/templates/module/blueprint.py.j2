@@ -2,7 +2,9 @@
 
 from flask import Blueprint
 
-# Mount path under app BASE_PATH (from config / env). Example final route: {BASE_PATH}{URL_PREFIX}/
+# Mount path under app BASE_PATH (from config / env).
+# Final routes: {BASE_PATH}{URL_PREFIX}/...
 URL_PREFIX = "/{{ name }}"
 
-bp = Blueprint("{{ name }}", __name__)
+# Flask application blueprint (URL mounting / registration)
+flask_bp = Blueprint("{{ name }}", __name__)
