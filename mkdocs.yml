@@ -40,7 +40,7 @@ nav:
   - CLI reference: cli.md
   - Architecture: architecture.md
   - Modules: modules.md
-  - Extending create_app: extending.md
+  - Customizing the app: extending.md
   - Configuration: configuration.md
   - Logging: logging.md
   - Swagger UI: swagger.md
@@ -48,8 +48,7 @@ nav:
   - Runtime: runtime.md
   - Docker: docker.md
   - OpenTelemetry: opentelemetry.md
-  - Publishing: publishing.md
-  - FAQ: faq.md
+  - Publish: publishing.md
 
 plugins:
   - search

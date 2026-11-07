@@ -39,7 +39,7 @@ class UsersResponse(Schema):
     pass
 ```
 
-No database models — add persistence yourself (see [Extending](extending.md)).
+No database models — add persistence yourself (see [Customizing the app](extending.md)).
 
 ## `resource.py` (Smorest)
 

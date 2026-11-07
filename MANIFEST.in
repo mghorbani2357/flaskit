@@ -1,5 +1,5 @@
 graft flaskit/templates
-include flaskit/templates/project/env.example.j2
+include flaskit/templates/project/env.j2
 include flaskit/templates/project/dockerignore
 include flaskit/templates/project/Dockerfile
 include flaskit/templates/project/python-version

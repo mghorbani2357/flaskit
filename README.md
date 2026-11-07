@@ -1,10 +1,16 @@
 # flaskit
 
-[![PyPI version](https://img.shields.io/pypi/v/flaskit-cli.svg)](https://pypi.org/project/flaskit-cli/)
-[![Python versions](https://img.shields.io/pypi/pyversions/flaskit-cli.svg)](https://pypi.org/project/flaskit-cli/)
-[![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![Docs](https://img.shields.io/badge/docs-Read%20the%20Docs-blue)](https://flaskit.readthedocs.io/)
-[![CI publish](https://img.shields.io/badge/publish-on%20git%20tag-success)](https://github.com/mghorbani2357/flaskit/actions)
+[![License](https://img.shields.io/github/license/mghorbani2357/flaskit)](https://raw.githubusercontent.com/mghorbani2357/flaskit/master/LICENSE)
+[![Workflow](https://img.shields.io/github/actions/workflow/status/mghorbani2357/flaskit/publish.yml?branch=master&logo=github)](https://github.com/mghorbani2357/flaskit/actions/workflows/publish.yml)
+[![PyPI version](https://img.shields.io/pypi/v/flaskit-cli)](https://pypi.org/project/flaskit-cli/)
+[![PyPI - Wheel](https://img.shields.io/pypi/wheel/flaskit-cli)](https://pypi.org/project/flaskit-cli/)
+[![PyPI - Format](https://img.shields.io/pypi/format/flaskit-cli)](https://pypi.org/project/flaskit-cli/)
+[![Python versions](https://img.shields.io/pypi/pyversions/flaskit-cli)](https://pypi.org/project/flaskit-cli/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/flaskit-cli)](https://pypistats.org/packages/flaskit-cli)
+[![Downloads](https://static.pepy.tech/personalized-badge/flaskit-cli?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/flaskit-cli)
+[![Documentation Status](https://readthedocs.org/projects/flaskit/badge/?version=latest)](https://flaskit.readthedocs.io/en/latest/?badge=latest)
+[![GitHub last commit](https://img.shields.io/github/last-commit/mghorbani2357/flaskit)](https://github.com/mghorbani2357/flaskit/commits/master)
+[![GitHub Release Date](https://img.shields.io/github/release-date/mghorbani2357/flaskit)](https://github.com/mghorbani2357/flaskit/releases)
 
 CLI scaffolding for **Flask + Flask-Smorest** APIs: modular resources, auto-discovery, local Swagger UI, JSON logging (optional OpenTelemetry), `BASE_PATH` for every route and asset, and a production Docker image with **bjoern**.
 
@@ -25,46 +31,47 @@ pip install -e .
 
 PyPI name is **`flaskit-cli`** (`flaskit` / `flask-it` are taken or blocked); the CLI and import stay **`flaskit`**.
 
-Requires Python **3.10+** for the CLI. Generated apps target **3.11–3.13** (3.12 recommended; see `.python-version`).
+Requires Python **3.10+** for the CLI. Generated apps target **Python 3.11+**.
 
 ## Quick start
 
 ```bash
+pip install flaskit-cli
 flaskit init myapi
 cd myapi
-python3.12 -m venv .venv
-# Windows PowerShell (if scripts are blocked):
-#   Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-#   .\.venv\Scripts\Activate.ps1
+python -m venv .venv
+# activate .venv, then:
 pip install -U pip && pip install -r requirements.txt
+# edit .env as needed
 flaskit generate module users
 python app.py
 ```
 
-Open [http://127.0.0.1:5000/docs](http://127.0.0.1:5000/docs).
+Open [http://127.0.0.1:5000/docs](http://127.0.0.1:5000/docs). Full walkthrough: [Quick start](https://flaskit.readthedocs.io/en/latest/quickstart/).
 
 ## CLI
 
 | Command | Description |
 |---------|-------------|
-| `flaskit init [path]` | Scaffold project (`app.py`, flat `config.py`, `resources/`, `assets/`, `templates/`) |
+| `flaskit init [path]` | Scaffold project (`app.py`, `config.py`, `.env`, `resources/`, `assets/`, `templates/`) |
 | `flaskit generate module <name>` | Create `resources/<name>/` with `flask_bp` + `smorest_blp` stubs |
 
 ## Layout
 
-```
-app.py                 # create_app, init_app
-config.py              # flat UPPER_CASE settings from env
-templates/
-  swagger_ui.html      # Swagger UI page (Jinja)
-resources/
-  users/
-    blueprint.py       # Flask blueprint (flask_bp) + URL_PREFIX
-    resource.py        # Smorest blueprint (smorest_blp) + CRUD
-    schema.py          # Request / Response schemas
-assets/
-  swagger-ui/          # local Swagger UI (no CDN)
-  statics/             # public files at {BASE_PATH}/assets/statics/...
+```text
+|- app.py
+|- config.py
+|- .env
+|- templates/
+|  > swagger_ui.html
+|- resources/
+|  > users/
+|     |- blueprint.py
+|     |- resource.py
+|     > schema.py
+> assets/
+   |- swagger-ui/
+   > statics/
 ```
 
 ## Highlights

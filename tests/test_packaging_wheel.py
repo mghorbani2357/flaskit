@@ -1,4 +1,4 @@
-"""Build a real wheel and prove templates (incl. env.example) are installed."""
+"""Build a real wheel and prove templates (incl. env.j2) are installed."""
 
 from __future__ import annotations
 
@@ -33,8 +33,10 @@ def built_wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
 def test_wheel_contains_env_example_template(built_wheel: Path) -> None:
     with zipfile.ZipFile(built_wheel) as zf:
         names = zf.namelist()
-    assert "flaskit/templates/project/env.example.j2" in names
+    assert "flaskit/templates/project/env.j2" in names
+    assert "flaskit/templates/project/.env.j2" not in names
     assert "flaskit/templates/project/.env.example.j2" not in names
+
     assert "flaskit/templates/project/app.py.j2" in names
     assert "flaskit/templates/project/Dockerfile" in names
     assert "flaskit/templates/project/dockerignore" in names
@@ -68,7 +70,7 @@ def test_wheel_install_init_succeeds(built_wheel: Path, tmp_path: Path) -> None:
         ],
         text=True,
     )
-    assert '".env.example": "project/env.example.j2"' in cli_src
+    assert '".env": "project/env.j2"' in cli_src
 
     result = subprocess.run(
         [str(flaskit), "init", str(project)],
@@ -77,7 +79,8 @@ def test_wheel_install_init_succeeds(built_wheel: Path, tmp_path: Path) -> None:
         check=False,
     )
     assert result.returncode == 0, result.stdout + "\n" + result.stderr
-    assert (project / ".env.example").is_file()
+    assert (project / ".env").is_file()
+    assert not (project / ".env.example").exists()
     assert (project / "app.py").is_file()
     assert (project / "Dockerfile").is_file()
     assert "TemplateNotFound" not in result.stderr

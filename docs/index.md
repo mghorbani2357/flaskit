@@ -18,11 +18,14 @@
 | Docker | Python 3.13 multi-stage image; **bjoern** only in Docker |
 | Cross-platform | Windows / macOS / Linux; `tzdata` for IANA zones |
 
+## Customize
+
+Generated apps are a shell. Add PostgreSQL, migrations, JWT, Redis, and other capabilities in `create_app` — see **[Customizing the app](extending.md)** for full recipes.
+
 ## Not included (by design)
 
-- No ORM or database layer — add your own in `create_app` (see [Extending](extending.md))
+- No ORM or auth layer out of the box (documented hooks instead)
 - No CDN for Swagger — assets ship with the project
-- No `.gitkeep` placeholders — empty directories are created as directories
 
 ## Preview these docs
 

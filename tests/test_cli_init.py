@@ -13,7 +13,7 @@ EXPECTED_ROOT_FILES = (
     "app.py",
     "config.py",
     "requirements.txt",
-    ".env.example",
+    ".env",
     "Dockerfile",
     ".dockerignore",
     ".python-version",
@@ -30,6 +30,7 @@ def test_init_creates_project_layout(runner: CliRunner, project_dir: Path) -> No
     for name in EXPECTED_ROOT_FILES:
         assert (project_dir / name).is_file(), f"missing {name}"
 
+    assert not (project_dir / ".env.example").exists()
     assert (project_dir / "resources").is_dir()
     assert (project_dir / "assets" / "statics").is_dir()
     assert (project_dir / "templates" / "swagger_ui.html").is_file()
@@ -39,7 +40,6 @@ def test_init_creates_project_layout(runner: CliRunner, project_dir: Path) -> No
         project_dir / "assets" / "swagger-ui" / "swagger-ui-standalone-preset.js"
     ).is_file()
 
-    # No .gitkeep placeholders; empty dirs are just directories
     assert not list(project_dir.rglob(".gitkeep"))
     assert not (project_dir / "assets" / "statics" / "README.txt").exists()
 
@@ -49,13 +49,14 @@ def test_init_seeds_title_from_folder_name(runner: CliRunner, tmp_path: Path) ->
     result = runner.invoke(main, ["init", str(target)])
     assert result.exit_code == 0, result.output
 
-    env_example = (target / ".env.example").read_text(encoding="utf-8")
+    env_file = (target / ".env").read_text(encoding="utf-8")
     config = (target / "config.py").read_text(encoding="utf-8")
-    assert "API_TITLE=payments" in env_example
-    assert "TIMEZONE=UTC" in env_example
+    assert "API_TITLE=payments" in env_file
+    assert "TIMEZONE=UTC" in env_file
     assert 'API_TITLE = _env("API_TITLE", "payments")' in config
     assert "TIMEZONE" in config
     assert "ZoneInfo" in config
+    assert "load_dotenv" in config
 
 
 def test_init_refuses_overwrite(runner: CliRunner, project_dir: Path) -> None:
@@ -76,6 +77,7 @@ def test_init_requirements_exclude_bjoern(runner: CliRunner, project_dir: Path) 
         if line.strip() and not line.strip().startswith("#")
     ]
     assert not any("bjoern" in line for line in install_lines)
+    assert any(line.startswith("python-dotenv") for line in install_lines)
     assert any(line.startswith("tzdata") for line in install_lines)
     dockerfile = (project_dir / "Dockerfile").read_text(encoding="utf-8")
     assert "bjoern" in dockerfile
@@ -90,7 +92,7 @@ def test_init_writes_python_version_and_marshmallow_pin(
     assert (project_dir / ".python-version").read_text(encoding="utf-8").strip() == "3.12"
     reqs = (project_dir / "requirements.txt").read_text(encoding="utf-8")
     assert "marshmallow>=3.24.1,<5" in reqs
-    assert "3.11–3.13" in reqs or "3.11-3.13" in reqs or "3.14" in reqs
+    assert "Python 3.11+" in reqs
 
 
 def test_init_app_has_core_hooks(runner: CliRunner, project_dir: Path) -> None:
@@ -114,7 +116,6 @@ def test_init_app_has_core_hooks(runner: CliRunner, project_dir: Path) -> None:
         assert needle in app_src, f"missing {needle}"
     assert "page_number" not in app_src
     assert "g.page" not in app_src
-    # Imports at top — no mid-file import of opentelemetry
     after_create = app_src.split("def create_app", 1)[1]
     assert "from opentelemetry" not in after_create
 

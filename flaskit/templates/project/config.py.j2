@@ -1,9 +1,14 @@
-"""Flat config from environment variables."""
+"""Flat config from environment variables (loads project ``.env`` if present)."""
 
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parent / ".env", override=False)
 
 
 def _env(key, default=None):

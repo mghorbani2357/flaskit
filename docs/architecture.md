@@ -20,7 +20,7 @@ create_app()
   -> return app
 ```
 
-Hook databases, caches, and auth in `create_app` — see [Extending](extending.md).
+Hook databases, caches, and auth in `create_app` — see [Customizing the app](extending.md).
 
 ## Blueprint nesting
 

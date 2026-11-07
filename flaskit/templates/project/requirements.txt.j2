@@ -1,11 +1,10 @@
-# Use Python 3.11–3.13 (see .python-version). Python 3.14 often cannot
-# install marshmallow/flask-smorest from PyPI or common mirrors yet.
+# Python 3.11+
 Flask>=3.0
 flask-smorest>=0.44
 marshmallow>=3.24.1,<5
 webargs>=8.3
 apispec>=6.3
-# IANA timezones on Windows / minimal Linux images
+python-dotenv>=1.0
 tzdata>=2024.1
 # bjoern is installed only in Docker (see Dockerfile) — needs libev / Linux
 opentelemetry-api>=1.24

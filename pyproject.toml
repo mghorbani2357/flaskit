@@ -44,6 +44,8 @@ test = [
     "marshmallow>=3.24.1,<5",
     "webargs>=8.3",
     "apispec>=6.3",
+    "python-dotenv>=1.0",
+    "tzdata>=2024.1",
 ]
 
 [project.scripts]

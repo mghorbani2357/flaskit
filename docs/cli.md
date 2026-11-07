@@ -18,7 +18,7 @@ Creates (among others):
 | `app.py` | Factory, logging, discovery, Flask/bjoern entry |
 | `config.py` | Flat env-backed settings |
 | `requirements.txt` | App dependencies (no bjoern) |
-| `.env.example` | Documented environment variables |
+| `.env` | Environment variables (loaded by `config.py`) |
 | `.python-version` | `3.12` |
 | `Dockerfile` / `.dockerignore` | Production image |
 | `templates/swagger_ui.html` | Swagger UI page |

@@ -1,4 +1,4 @@
-# Publishing flaskit to PyPI
+# Publish
 
 The distribution name on PyPI is **`flaskit-cli`** (`pip install flaskit-cli`). The import package and console script remain `flaskit`.
 
@@ -32,4 +32,4 @@ pip install -U build
 python -m build
 ```
 
-Confirm the wheel is named `flaskit_cli-…` and that `flaskit/templates/project/env.example.j2` is inside the archive.
+Confirm the wheel is named `flaskit_cli-…` and that `flaskit/templates/project/env.j2` is inside the archive.

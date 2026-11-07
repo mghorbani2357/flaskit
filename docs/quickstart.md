@@ -1,77 +1,146 @@
 # Quick start
 
-## 1. Scaffold
+This page walks through one full journey: install flaskit → create a project → configure `.env` → add a module → run the API → open Swagger.
+
+## 1. Install flaskit
+
+```bash
+pip install flaskit-cli
+flaskit --version
+```
+
+The PyPI name is `flaskit-cli`. The command and import stay `flaskit`.
+
+## 2. Create a project
 
 ```bash
 flaskit init myapi
 cd myapi
 ```
 
-## 2. Virtual environment (Python 3.12)
-
-=== "Linux / macOS"
-
-    ```bash
-    python3.12 -m venv .venv
-    source .venv/bin/activate
-    pip install -U pip
-    pip install -r requirements.txt
-    ```
-
-=== "Windows PowerShell"
-
-    ```powershell
-    py -3.12 -m venv .venv
-    Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-    .\.venv\Scripts\Activate.ps1
-    python -m pip install -U pip
-    pip install -r requirements.txt
-    ```
-
-## 3. Add a module and run
-
-```bash
-flaskit generate module users
-python app.py
-```
-
-Open http://127.0.0.1:5000/docs.
-
-!!! tip "Port 5000 blocked (common on Windows)"
-    ```powershell
-    $env:HOST="127.0.0.1"
-    $env:PORT="8082"
-    python app.py
-    ```
-
-## Generated layout
+`init` writes the application files and a **`.env`** next to `app.py`. Layout:
 
 ```text
 myapi/
-  app.py
-  config.py
-  requirements.txt
-  Dockerfile
-  .dockerignore
-  .python-version      # 3.12
-  .env.example
-  templates/
-    swagger_ui.html
-  resources/
-    users/
-      blueprint.py     # flask_bp (Flask)
-      resource.py      # smorest_blp (Smorest)
-      schema.py
-  assets/
-    swagger-ui/
-    statics/
+|- app.py
+|- config.py
+|- requirements.txt
+|- Dockerfile
+|- .dockerignore
+|- .python-version
+|- .env
+|- templates/
+|  > swagger_ui.html
+|- resources/
+|- assets/
+|  |- swagger-ui/
+|  > statics/
+> …
 ```
 
-Swagger title defaults to the folder name (`myapi`). Override with `API_TITLE`.
+## 3. Create a virtual environment and install app deps
 
-## Next steps
+Generated apps need **Python 3.11+**.
 
-- Mount under a prefix: set `BASE_PATH=/api` — routes, docs, and assets all move under `/api`
-- Set timezone: `TIMEZONE=Asia/Tehran`
-- Add a database or other extensions: [Extending create_app](extending.md)
-- Build for production: [Docker](docker.md)
+```bash
+python -m venv .venv
+```
+
+Activate `.venv` for your shell, then:
+
+```bash
+pip install -U pip
+pip install -r requirements.txt
+```
+
+## 4. Configure `.env`
+
+`config.py` loads `.env` automatically (`python-dotenv`). Edit values before the first run:
+
+```env
+API_TITLE=myapi
+API_DESCRIPTION=myapi API
+ENV=development
+DEBUG=true
+HOST=127.0.0.1
+PORT=5000
+BASE_PATH=/
+DOCS_PATH=/docs
+TIMEZONE=UTC
+LOG_OUTPUT=stream,file
+SECRET_KEY=change-me
+```
+
+Useful tweaks:
+
+```env
+BASE_PATH=/api
+PORT=8080
+TIMEZONE=Asia/Tehran
+```
+
+With `BASE_PATH=/api`, routes and docs move under `/api` (for example `/api/docs`, `/api/users/`).
+
+Full variable list: [Configuration](configuration.md).
+
+## 5. Generate an API module
+
+```bash
+flaskit generate module users
+```
+
+Creates:
+
+```text
+resources/
+> users/
+   |- blueprint.py    # flask_bp (Flask) + URL_PREFIX=/users
+   |- resource.py     # smorest_blp (Smorest) CRUD stubs
+   > schema.py        # Request / Response schemas
+```
+
+Restart is not required yet if the app is not running; discovery runs on startup.
+
+## 6. Run the app
+
+```bash
+python app.py
+```
+
+Default mode is `ENV=development` (Flask). You should see the process bind to `HOST:PORT` from `.env`.
+
+## 7. Open Swagger and try a call
+
+Open:
+
+- Docs: http://127.0.0.1:5000/docs  
+  (or http://127.0.0.1:8080/api/docs if you set `PORT=8080` and `BASE_PATH=/api`)
+
+In the UI:
+
+1. Select **users** (or **All modules**)
+2. Try `GET /users/` — stub returns `[]`
+3. Try `POST /users/` — stub returns `{}` with status 201
+
+Example with curl (defaults):
+
+```bash
+curl -s http://127.0.0.1:5000/users/
+curl -s -X POST http://127.0.0.1:5000/users/ \
+  -H "Content-Type: application/json" \
+  -d "{}"
+```
+
+OpenAPI JSON: http://127.0.0.1:5000/docs/openapi.json
+
+## 8. What to do next
+
+| Goal | Where |
+|------|--------|
+| Change env settings | Edit `.env` → [Configuration](configuration.md) |
+| Add fields / real handlers | Edit `resources/users/schema.py` and `resource.py` → [Modules](modules.md) |
+| PostgreSQL, JWT, Redis | [Customizing the app](extending.md) |
+| Production image | [Docker](docker.md) |
+| Custom application logs | [Logging](logging.md) |
+
+You now have a running Flask-Smorest API with local Swagger, logging, and one generated module.

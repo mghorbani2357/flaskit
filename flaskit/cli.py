@@ -16,7 +16,9 @@ from jinja2 import select_autoescape
 MODULE_NAME_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 
 TEMPLATE_ALIASES = {
-    "project/.env.example.j2": "project/env.example.j2",
+    "project/.env.j2": "project/env.j2",
+    "project/.env.example.j2": "project/env.j2",
+    "project/env.example.j2": "project/env.j2",
 }
 
 
@@ -90,10 +92,11 @@ def main() -> None:
       python -m flaskit -h
 
     \b
-    After init (use Python 3.12):
+    After init (Python 3.11+):
       cd myapi
-      python3.12 -m venv .venv
+      python -m venv .venv
       pip install -r requirements.txt
+      # edit .env
       flaskit generate module users
       python app.py
     """
@@ -122,22 +125,11 @@ def init_project(path: Path) -> None:
     target.mkdir(parents=True, exist_ok=True)
     project_name = target.name
 
-    if sys.version_info >= (3, 14):
-        click.echo(
-            "WARNING: Python "
-            f"{sys.version_info.major}.{sys.version_info.minor} detected. "
-            "Generated apps expect Python 3.11-3.13 (3.12 recommended). "
-            "Create the venv with Python 3.12, e.g.:\n"
-            "  brew install python@3.12\n"
-            "  /opt/homebrew/opt/python@3.12/bin/python3.12 -m venv .venv",
-            err=True,
-        )
-
     project_files = {
         "app.py": "project/app.py.j2",
         "config.py": "project/config.py.j2",
         "requirements.txt": "project/requirements.txt.j2",
-        ".env.example": "project/env.example.j2",
+        ".env": "project/env.j2",
     }
 
     for dest_name, template_name in project_files.items():
@@ -207,10 +199,11 @@ def init_project(path: Path) -> None:
         except ValueError:
             cd_arg = str(target)
         click.echo(f"  1. cd {cd_arg}")
-    click.echo("  2. python3.12 -m venv .venv && activate it  # 3.11-3.13 required")
+    click.echo("  2. python -m venv .venv && activate it  # Python 3.11+")
     click.echo("  3. pip install -U pip && pip install -r requirements.txt")
-    click.echo("  4. flaskit generate module <name>")
-    click.echo("  5. python app.py   # ENV=development (Flask)")
+    click.echo("  4. edit .env as needed")
+    click.echo("  5. flaskit generate module <name>")
+    click.echo("  6. python app.py")
     click.echo(
         f"     # production (bjoern, Docker only): "
         f"docker build --build-arg DOCKER_TAG=1.0.0 -t {project_name} ."

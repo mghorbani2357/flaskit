@@ -17,14 +17,13 @@ pip install -r requirements.txt
 
 Generated projects include `.python-version` = `3.12`. Supported app range: **3.11–3.13**.
 
-## `TemplateNotFound: project/.env.example.j2`
+## `TemplateNotFound` for env templates
 
-Old install. Setuptools omits templates whose names start with `.`; the packaged name is `env.example.j2`.
+Old installs looked for a leading-dot Jinja name. Current packages ship `templates/project/env.j2` and write project **`.env`**.
 
 ```bash
 pip uninstall flaskit-cli flask-it flaskit -y
 pip install -U flaskit-cli
-# or from git: pip install -U "git+https://github.com/mghorbani2357/flaskit.git@master"
 flaskit --version
 flaskit init tpm
 ```
@@ -33,9 +32,9 @@ flaskit init tpm
 
 No. It is a **CLI scaffold**. Generated projects run without importing `flaskit`.
 
-## Why is there no database layer?
+## Why is there no database or JWT layer?
 
-By design. Add persistence in `create_app` — see [Extending](extending.md).
+By design. Add PostgreSQL, migrations, JWT, and other extensions in `create_app` — see [Customizing the app](extending.md).
 
 ## Why don’t I see a Servers dropdown?
 
