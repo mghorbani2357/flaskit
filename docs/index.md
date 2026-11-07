@@ -1,40 +1,29 @@
 # flaskit
 
-**flaskit** is a scaffolding CLI for **Flask + Flask-Smorest** APIs. It generates a self-contained project; generated apps do **not** import `flaskit` at runtime.
+**flaskit** scaffolds **Flask + Flask-Smorest** APIs. It is a CLI generator: the created project does not import `flaskit` at runtime.
 
-## What you get
+```bash
+pip install flaskit-cli
+flaskit init myapi
+```
 
-| Capability | Detail |
-|------------|--------|
-| Modular resources | `flaskit generate module` → `flask_bp` + `smorest_blp` + schemas |
-| Auto-discovery | Folders under `resources/` registered on startup |
-| Flat configuration | `UPPER_CASE` env vars in `config.py` |
-| `BASE_PATH` | Prefixes API routes, docs, and static assets |
-| Local Swagger UI | Served from Jinja `templates/swagger_ui.html` + `assets/swagger-ui/` (no CDN) |
-| Multi-definition OpenAPI | “All modules” plus one definition per resource |
-| JSON logging | App / request / response loggers → stream and/or file |
-| Timezone | `TIMEZONE` (IANA) on log payloads |
-| OpenTelemetry | Optional traces + log bridge respecting `LOG_OUTPUT` |
-| Docker | Python 3.13 multi-stage image; **bjoern** only in Docker |
-| Cross-platform | Windows / macOS / Linux; `tzdata` for IANA zones |
+Then follow the [Quick start](quickstart.md) from virtualenv through Swagger.
+
+## Highlights
+
+- Modular `resources/` with auto-discovery (`flask_bp` + `smorest_blp`)
+- Flat `.env` / `UPPER_CASE` config (`BASE_PATH` applies to routes, docs, and assets)
+- Local Swagger UI (no CDN), multi-definition OpenAPI
+- JSON logging (stream and/or file) and optional OpenTelemetry
+- Docker image with bjoern for production
 
 ## Customize
 
-Generated apps are a shell. Add PostgreSQL, migrations, JWT, Redis, and other capabilities in `create_app` — see **[Customizing the app](extending.md)** for full recipes.
+Add PostgreSQL, JWT, Redis, and other capabilities in `create_app` — see [Customizing the app](extending.md).
 
-## Not included (by design)
+## Publish
 
-- No ORM or auth layer out of the box (documented hooks instead)
-- No CDN for Swagger — assets ship with the project
-
-## Preview these docs
-
-```bash
-pip install -e ".[docs]"
-mkdocs serve
-```
-
-Open http://127.0.0.1:8000.
+Package releases and PyPI: [Publish](publishing.md).
 
 ## License
 
