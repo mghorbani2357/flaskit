@@ -1,14 +1,16 @@
 # Publishing flaskit to PyPI
 
-The distribution name on PyPI is **`flask-it`** (`pip install flask-it`). The import package and console script remain `flaskit`.
+The distribution name on PyPI is **`flaskit-cli`** (`pip install flaskit-cli`). The import package and console script remain `flaskit`.
+
+(`flaskit` and `flask-it` are unavailable / blocked by PyPI’s similarity rules.)
 
 Package versions are derived from **git tags** using `setuptools-scm` (configured in `pyproject.toml`).
 
 ## Tag and push
 
 ```bash
-git tag -a v0.2.0 -m "flask-it 0.2.0"
-git push origin v0.2.0
+git tag -a v0.2.1 -m "flaskit-cli 0.2.1"
+git push origin v0.2.1
 ```
 
 Tags matching `v*` trigger [`.github/workflows/publish.yml`](https://github.com/mghorbani2357/flaskit/blob/master/.github/workflows/publish.yml). The workflow builds with Python 3.12 and uploads to PyPI automatically.
@@ -30,4 +32,4 @@ pip install -U build
 python -m build
 ```
 
-Confirm the wheel is named `flask_it-…` and that `flaskit/templates/project/env.example.j2` is inside the archive.
+Confirm the wheel is named `flaskit_cli-…` and that `flaskit/templates/project/env.example.j2` is inside the archive.

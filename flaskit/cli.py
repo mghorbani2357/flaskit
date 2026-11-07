@@ -78,7 +78,7 @@ def _copy_tree(src: Path, dst: Path) -> None:
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
-@click.version_option(package_name="flask-it")
+@click.version_option(package_name="flaskit-cli")
 def main() -> None:
     """Scaffold Flask-Smorest projects and resource modules.
 

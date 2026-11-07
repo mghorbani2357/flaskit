@@ -25,7 +25,7 @@ def built_wheel(tmp_path_factory: pytest.TempPathFactory) -> Path:
         check=True,
         cwd=REPO_ROOT,
     )
-    wheels = list(dist.glob("flask_it-*.whl")) + list(dist.glob("flask-it-*.whl"))
+    wheels = list(dist.glob("flaskit_cli-*.whl")) + list(dist.glob("flaskit-cli-*.whl"))
     assert wheels, f"No wheel produced in {dist}"
     return wheels[0]
 

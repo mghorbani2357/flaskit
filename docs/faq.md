@@ -22,9 +22,9 @@ Generated projects include `.python-version` = `3.12`. Supported app range: **3.
 Old install. Setuptools omits templates whose names start with `.`; the packaged name is `env.example.j2`.
 
 ```bash
-pip uninstall flask-it flaskit -y
-pip install -U "flask-it @ git+https://github.com/mghorbani2357/flaskit.git@master"
-# or: pip install -U "git+https://github.com/mghorbani2357/flaskit.git@master"
+pip uninstall flaskit-cli flask-it flaskit -y
+pip install -U flaskit-cli
+# or from git: pip install -U "git+https://github.com/mghorbani2357/flaskit.git@master"
 flaskit --version
 flaskit init tpm
 ```

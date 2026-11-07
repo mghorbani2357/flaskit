@@ -1,7 +1,7 @@
 # flaskit
 
-[![PyPI version](https://img.shields.io/pypi/v/flask-it.svg)](https://pypi.org/project/flask-it/)
-[![Python versions](https://img.shields.io/pypi/pyversions/flask-it.svg)](https://pypi.org/project/flask-it/)
+[![PyPI version](https://img.shields.io/pypi/v/flaskit-cli.svg)](https://pypi.org/project/flaskit-cli/)
+[![Python versions](https://img.shields.io/pypi/pyversions/flaskit-cli.svg)](https://pypi.org/project/flaskit-cli/)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-Read%20the%20Docs-blue)](https://flaskit.readthedocs.io/)
 [![CI publish](https://img.shields.io/badge/publish-on%20git%20tag-success)](https://github.com/mghorbani2357/flaskit/actions)
@@ -18,12 +18,12 @@ mkdocs serve
 ## Install
 
 ```bash
-pip install flask-it
+pip install flaskit-cli
 # or from source
 pip install -e .
 ```
 
-PyPI name is **`flask-it`** (`flaskit` is taken); the CLI and import stay **`flaskit`**.
+PyPI name is **`flaskit-cli`** (`flaskit` / `flask-it` are taken or blocked); the CLI and import stay **`flaskit`**.
 
 Requires Python **3.10+** for the CLI. Generated apps target **3.11–3.13** (3.12 recommended; see `.python-version`).
 

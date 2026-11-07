@@ -15,10 +15,10 @@
 === "PyPI"
 
     ```bash
-    pip install flask-it
+    pip install flaskit-cli
     ```
 
-    The PyPI project is **`flask-it`** (the name `flaskit` is taken). After install, the CLI and import package are still **`flaskit`**.
+    The PyPI project is **`flaskit-cli`** (`flaskit` / `flask-it` are taken or blocked). After install, the CLI and import package are still **`flaskit`**.
 
 === "Editable (development)"
 
